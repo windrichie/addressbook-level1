@@ -99,6 +99,7 @@ public class AddressBook {
                                                             + PERSON_DATA_PREFIX_PHONE + "%2$s " // phone
                                                             + PERSON_DATA_PREFIX_EMAIL + "%3$s"; // email
     private static final String COMMAND_ADD_WORD = "add";
+    private static final String COMMAND_ADDLIST_WORD = "add&list";
     private static final String COMMAND_ADD_DESC = "Adds a person to the address book.";
     private static final String COMMAND_ADD_PARAMETERS = "NAME "
                                                       + PERSON_DATA_PREFIX_PHONE + "PHONE_NUMBER "
@@ -371,6 +372,8 @@ public class AddressBook {
         switch (commandType) {
         case COMMAND_ADD_WORD:
             return executeAddPerson(commandArgs);
+        case COMMAND_ADDLIST_WORD:
+            return executeAddListPerson(commandArgs);
         case COMMAND_FIND_WORD:
             return executeFindPersons(commandArgs);
         case COMMAND_LIST_WORD:
@@ -427,6 +430,26 @@ public class AddressBook {
         // add the person as specified
         final String[] personToAdd = decodeResult.get();
         addPersonToAddressBook(personToAdd);
+        return getMessageForSuccessfulAddPerson(personToAdd);
+    }
+
+    private static String executeAddListPerson(String commandArgs) {
+        // try decoding a person from the raw args
+        final Optional<String[]> decodeResult = decodePersonFromString(commandArgs);
+
+        // checks if args are valid (decode result will not be present if the person is invalid)
+        if (!decodeResult.isPresent()) {
+            return getMessageForInvalidCommandInput(COMMAND_ADD_WORD, getUsageInfoForAddCommand());
+        }
+
+        // add the person as specified
+        final String[] personToAdd = decodeResult.get();
+        addPersonToAddressBook(personToAdd);
+        // get all persons in address book
+        ArrayList<String[]> toBeDisplayed = getAllPersonsInAddressBook();
+        // print all persons in address book
+        showToUser(toBeDisplayed);
+
         return getMessageForSuccessfulAddPerson(personToAdd);
     }
 
